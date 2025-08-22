@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { Sidebar } from '@/components/Sidebar';
+import { AppSidebar } from '@/components/Sidebar';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { 
   FileText, 
   Code, 
@@ -99,64 +100,73 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      
-      <main ref={containerRef} className="flex-1 p-8 overflow-auto">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-12">
-            <h1 className="text-4xl font-bold mb-4">Innovation Starter Pack</h1>
-            <p className="text-muted-foreground text-lg">
-              Kickstart your innovation process with our comprehensive selection of predefined prompts.
-            </p>
-          </div>
+    <SidebarProvider>
+      <div className="flex h-screen bg-background w-full">
+        <AppSidebar />
+        
+        <div className="flex flex-col flex-1">
+          <header className="h-12 flex items-center border-b px-4">
+            <SidebarTrigger className="mr-2" />
+            <h1 className="text-lg font-semibold">Innovation Starter Pack</h1>
+          </header>
+          
+          <main ref={containerRef} className="flex-1 p-8 overflow-auto">
+            <div className="max-w-7xl mx-auto">
+              {/* Header */}
+              <div className="mb-12">
+                <h1 className="text-4xl font-bold mb-4">Innovation Starter Pack</h1>
+                <p className="text-muted-foreground text-lg">
+                  Kickstart your innovation process with our comprehensive selection of predefined prompts.
+                </p>
+              </div>
 
-          {/* Starter Pack Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8">
-            {starterPackItems.map((category, index) => (
-              <Card 
-                key={index}
-                className="starter-pack-card card-gradient p-6 border-border hover:border-primary/30 transition-all duration-300"
-              >
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                    {category.icon}
-                  </div>
-                  <h3 className="text-lg font-semibold">{category.title}</h3>
-                </div>
-
-                <div className="space-y-3">
-                  {category.items.map((item, itemIndex) => (
-                    <div 
-                      key={itemIndex}
-                      className="pack-item flex items-center gap-3 p-3 rounded-lg bg-background/50 hover:bg-primary/10 transition-colors cursor-pointer group"
-                    >
-                      <div className="text-muted-foreground group-hover:text-primary transition-colors">
-                        {item.icon}
+              {/* Starter Pack Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8">
+                {starterPackItems.map((category, index) => (
+                  <Card 
+                    key={index}
+                    className="starter-pack-card card-gradient p-6 border-border hover:border-primary/30 transition-all duration-300"
+                  >
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                        {category.icon}
                       </div>
-                      <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-                        {item.name}
-                      </span>
+                      <h3 className="text-lg font-semibold">{category.title}</h3>
                     </div>
-                  ))}
-                </div>
-              </Card>
-            ))}
-          </div>
 
-          {/* Additional Info */}
-          <div className="mt-16 text-center">
-            <Badge variant="outline" className="px-4 py-2 text-sm border-primary/20 bg-primary/5">
-              Ready to get started?
-            </Badge>
-            <p className="text-muted-foreground mt-4">
-              Select any prompt above to begin your creative journey with AI assistance.
-            </p>
-          </div>
+                    <div className="space-y-3">
+                      {category.items.map((item, itemIndex) => (
+                        <div 
+                          key={itemIndex}
+                          className="pack-item flex items-center gap-3 p-3 rounded-lg bg-background/50 hover:bg-primary/10 transition-colors cursor-pointer group"
+                        >
+                          <div className="text-muted-foreground group-hover:text-primary transition-colors">
+                            {item.icon}
+                          </div>
+                          <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                            {item.name}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Additional Info */}
+              <div className="mt-16 text-center">
+                <Badge variant="outline" className="px-4 py-2 text-sm border-primary/20 bg-primary/5">
+                  Ready to get started?
+                </Badge>
+                <p className="text-muted-foreground mt-4">
+                  Select any prompt above to begin your creative journey with AI assistance.
+                </p>
+              </div>
+            </div>
+          </main>
         </div>
-      </main>
-    </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
