@@ -96,7 +96,7 @@ export const HeroSection = () => {
 
         {/* CTA Buttons */}
         <div ref={buttonsRef} className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-          <Button className="btn-hero group">
+          <Button className="btn-hero group" onClick={() => window.location.href = '/dashboard'}>
             Start Creating for Free
             <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
           </Button>

@@ -190,7 +190,7 @@ export const OverviewSection = () => {
               </div>
             </div>
 
-            <button className="btn-hero group">
+            <button className="btn-hero group" onClick={() => window.location.href = '/dashboard'}>
               Start Your Free Trial
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </button>
