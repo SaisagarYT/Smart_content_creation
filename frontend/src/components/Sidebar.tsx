@@ -1,8 +1,9 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useSearchHistoryContext } from '@/hooks/use-search-history';
 import {
   Sidebar,
   SidebarContent,
@@ -17,27 +18,65 @@ import {
 } from '@/components/ui/sidebar';
 import { 
   Search,
-  CreditCard,
+  Clock,
   Triangle,
   MessageSquare,
   Library,
-  Plus,
-  Settings
+  Settings,
+  FileText,
+  Image as ImageIcon,
+  Database,
+  PenTool
 } from 'lucide-react';
-
-const projects = [
-  { name: 'Orbital Oddysey', active: true, icon: '🚀', alert: true },
-  { name: 'Digital Product Launch', active: false, icon: '📱', alert: true },
-  { name: 'Brand Refresh', active: false, icon: '🎨', alert: false },
-  { name: 'Social Media Strategy', active: false, icon: '📱', alert: false }
-];
 
 export const AppSidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { open, setOpen } = useSidebar();
+  const { history, getRecentByType } = useSearchHistoryContext();
   const collapsed = !open;
   const isDashboard = location.pathname === '/dashboard';
   const isChat = location.pathname === '/chat';
+  const isGenerate = location.pathname === '/generate';
+  const isGenerateImage = location.pathname === '/generate-image';
+  const isContent = location.pathname === '/content';
+
+  // Get recent history items (limited to 5)
+  const recentHistory = history.slice(0, 5);
+
+  // Handle history item click
+  const handleHistoryItemClick = (item: any) => {
+    switch (item.type) {
+      case 'chat':
+        navigate('/chat');
+        break;
+      case 'image':
+        navigate('/generate-image');
+        break;
+      case 'content':
+        navigate('/generate');
+        break;
+      case 'search':
+        navigate('/content');
+        break;
+    }
+  };
+
+  // Get icon for history item type
+  const getHistoryIcon = (type: string) => {
+    switch (type) {
+      case 'chat':
+        return <MessageSquare className="w-4 h-4" />;
+      case 'image':
+        return <ImageIcon className="w-4 h-4" />;
+      case 'content':
+        return <FileText className="w-4 h-4" />;
+      case 'search':
+        return <Search className="w-4 h-4" />;
+      default:
+        return <Clock className="w-4 h-4" />;
+    }
+  };
 
   return (
     <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible="icon">
@@ -97,6 +136,51 @@ export const AppSidebar = () => {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link 
+                    to="/generate"
+                    className={`flex items-center gap-2 transition-colors ${
+                      isGenerate 
+                        ? 'bg-primary/20 text-primary border border-primary/30' 
+                        : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
+                    }`}
+                  >
+                    <PenTool className="w-4 h-4" />
+                    {!collapsed && <span>Generate Content</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link 
+                    to="/generate-image"
+                    className={`flex items-center gap-2 transition-colors ${
+                      isGenerateImage 
+                        ? 'bg-primary/20 text-primary border border-primary/30' 
+                        : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
+                    }`}
+                  >
+                    <ImageIcon className="w-4 h-4" />
+                    {!collapsed && <span>Generate Image</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link 
+                    to="/content"
+                    className={`flex items-center gap-2 transition-colors ${
+                      isContent 
+                        ? 'bg-primary/20 text-primary border border-primary/30' 
+                        : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
+                    }`}
+                  >
+                    <Database className="w-4 h-4" />
+                    {!collapsed && <span>My Content</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
                 <SidebarMenuButton className="text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50">
                   <Library className="w-4 h-4" />
                   {!collapsed && <span>Library</span>}
@@ -124,67 +208,48 @@ export const AppSidebar = () => {
               </div>
             </div>
 
-            {/* General Section */}
+            {/* History Section */}
             <SidebarGroup>
-              <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                General
-              </SidebarGroupLabel>
+              <div className="flex items-center justify-between px-4">
+                <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Recent History
+                </SidebarGroupLabel>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-6 h-6 p-0"
+                  onClick={() => window.location.href = '/history'}
+                >
+                  <Clock className="w-4 h-4" />
+                </Button>
+              </div>
               <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton className="text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50">
-                      <CreditCard className="w-4 h-4" />
-                      <span>Billing</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
+                <div className="px-2 py-2 space-y-1">
+                  {recentHistory.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => handleHistoryItemClick(item)}
+                      className="w-full text-left text-sm hover:bg-sidebar-accent/50 rounded-md p-2 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        {getHistoryIcon(item.type)}
+                        <span className="truncate">{item.query}</span>
+                      </div>
+                    </button>
+                  ))}
+                  {recentHistory.length === 0 && (
+                    <div className="text-sm text-muted-foreground py-1 px-2">
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4" />
+                        <span className="truncate">Recent activity will appear here</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </SidebarGroupContent>
             </SidebarGroup>
           </>
         )}
-
-        {/* Projects Section */}
-        <SidebarGroup className="flex-1">
-          <div className="flex items-center justify-between px-4">
-            <SidebarGroupLabel className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-              {!collapsed ? "Projects" : "P"}
-            </SidebarGroupLabel>
-            <Button variant="ghost" size="sm" className="w-5 h-5 p-0">
-              <Plus className="w-3 h-3" />
-            </Button>
-          </div>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {projects.map((project, index) => (
-                <SidebarMenuItem key={index}>
-                  <SidebarMenuButton 
-                    className={`transition-colors ${
-                      project.active
-                        ? 'bg-primary/20 text-primary'
-                        : 'text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50'
-                    }`}
-                  >
-                    <span className="text-base">{project.icon}</span>
-                    {!collapsed && (
-                      <>
-                        <span className="truncate">{project.name}</span>
-                        {project.alert && (
-                          <div className="w-2 h-2 rounded-full bg-destructive flex-shrink-0 ml-auto" />
-                        )}
-                      </>
-                    )}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-              <SidebarMenuItem>
-                <SidebarMenuButton className="text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50">
-                  <Plus className="w-4 h-4" />
-                  {!collapsed && <span>Add new project</span>}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
 
         {/* User Section */}
         <div className="px-4 py-3 border-t border-sidebar-border">

@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { AppSidebar } from '@/components/Sidebar';
 import { Card } from '@/components/ui/card';
@@ -25,33 +26,36 @@ import {
 
 const starterPackItems = [
   {
-    title: 'Creative Assets',
-    icon: <ImageIcon className="w-6 h-6" />,
-    items: [
-      { name: 'UI wireframe', icon: <Monitor className="w-4 h-4" /> },
-      { name: 'Brochure design', icon: <FileText className="w-4 h-4" /> },
-      { name: 'Social media', icon: <Share2 className="w-4 h-4" /> },
-      { name: 'Brand guidelines', icon: <PenTool className="w-4 h-4" /> }
-    ]
-  },
-  {
-    title: 'Developer Tools',
-    icon: <Code className="w-6 h-6" />,
-    items: [
-      { name: 'API Integration', icon: <Settings className="w-4 h-4" /> },
-      { name: 'Test automation', icon: <TestTube className="w-4 h-4" /> },
-      { name: 'DB optimization', icon: <Database className="w-4 h-4" /> },
-      { name: 'Code review', icon: <GitBranch className="w-4 h-4" /> }
-    ]
-  },
-  {
     title: 'Content Creation',
     icon: <PenTool className="w-6 h-6" />,
+    route: '/generate',
     items: [
-      { name: 'Product description', icon: <FileText className="w-4 h-4" /> },
-      { name: 'E-mail copy', icon: <Mail className="w-4 h-4" /> },
-      { name: 'Whitepaper', icon: <FileBarChart className="w-4 h-4" /> },
-      { name: 'Press release', icon: <Newspaper className="w-4 h-4" /> }
+      { name: 'Blog Posts', icon: <FileText className="w-4 h-4" /> },
+      { name: 'Articles', icon: <Newspaper className="w-4 h-4" /> },
+      { name: 'Social Media', icon: <Share2 className="w-4 h-4" /> },
+      { name: 'Email Copy', icon: <Mail className="w-4 h-4" /> }
+    ]
+  },
+  {
+    title: 'Image Generation',
+    icon: <ImageIcon className="w-6 h-6" />,
+    route: '/generate-image',
+    items: [
+      { name: 'Image Description', icon: <FileText className="w-4 h-4" /> },
+      { name: 'Visual Concepts', icon: <Brain className="w-4 h-4" /> },
+      { name: 'Art Styles', icon: <PenTool className="w-4 h-4" /> },
+      { name: 'Scene Creation', icon: <Monitor className="w-4 h-4" /> }
+    ]
+  },
+  {
+    title: 'My Content',
+    icon: <Database className="w-6 h-6" />,
+    route: '/content',
+    items: [
+      { name: 'View All Content', icon: <FileText className="w-4 h-4" /> },
+      { name: 'Recent Items', icon: <TrendingUp className="w-4 h-4" /> },
+      { name: 'Favorites', icon: <Share2 className="w-4 h-4" /> },
+      { name: 'Analytics', icon: <FileBarChart className="w-4 h-4" /> }
     ]
   },
   {
@@ -67,6 +71,7 @@ const starterPackItems = [
 ];
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -139,6 +144,7 @@ const Dashboard = () => {
                         <div 
                           key={itemIndex}
                           className="pack-item flex items-center gap-3 p-3 rounded-lg bg-background/50 hover:bg-primary/10 transition-colors cursor-pointer group"
+                          onClick={() => navigate(category.route || '/')}
                         >
                           <div className="text-muted-foreground group-hover:text-primary transition-colors">
                             {item.icon}

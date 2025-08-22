@@ -157,3 +157,99 @@ exports.generateImage = async (prompt, base64Image) => {
     throw new Error("Failed to generate image using AI");
   }
 };
+
+// Utility function for exponential backoff
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Rate limiting configuration
+let lastRequestTime = 0;
+let requestCount = 0;
+const MIN_REQUEST_INTERVAL = 5000; // 5 seconds between requests
+const MAX_REQUESTS_PER_MINUTE = 10;
+const QUOTA_RESET_INTERVAL = 60000; // 1 minute
+
+// Reset request count periodically
+setInterval(() => {
+  requestCount = 0;
+}, QUOTA_RESET_INTERVAL);
+
+// Function to extract retry delay from error
+const getRetryDelay = (error) => {
+  try {
+    const retryInfo = error.errorDetails?.find((d) =>
+      d["@type"]?.includes("RetryInfo")
+    );
+    if (retryInfo?.retryDelay) {
+      const seconds = parseInt(retryInfo.retryDelay.replace("s", ""));
+      return (seconds + 1) * 1000; // Convert to ms and add 1 second buffer
+    }
+  } catch (e) {
+    console.error("Error parsing retry delay:", e);
+  }
+  return 20000; // Default to 20 seconds if we can't parse the delay
+};
+
+// Function to handle chat messages using Google Gemini API
+exports.generateChat = async (message, retryCount = 0) => {
+  try {
+    // Check quota
+    if (requestCount >= MAX_REQUESTS_PER_MINUTE) {
+      throw { status: 429, message: "Rate limit exceeded" };
+    }
+
+    // Rate limiting
+    const now = Date.now();
+    const timeSinceLastRequest = now - lastRequestTime;
+    if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+      await wait(MIN_REQUEST_INTERVAL - timeSinceLastRequest);
+    }
+
+    // Update rate limiting trackers
+    lastRequestTime = Date.now();
+    requestCount++;
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash", // Use flash model instead of pro
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 500, // Further reduced token limit
+      },
+    });
+
+    const chat = model.startChat({
+      history: [],
+      generationConfig: {
+        maxOutputTokens: 500,
+        temperature: 0.7,
+        topP: 0.8,
+        topK: 40,
+      },
+    });
+
+    const result = await chat.sendMessage(message);
+    const response = await result.response;
+    return response.text().trim();
+  } catch (error) {
+    console.error("Error generating chat response:", error);
+
+    // Handle rate limiting errors
+    if (error.status === 429 && retryCount < 2) {
+      // Reduced max retries
+      const retryDelay = error.errorDetails
+        ? getRetryDelay(error) // Use server-provided delay if available
+        : Math.max(20000, Math.pow(2, retryCount + 1) * 5000); // Minimum 20s, then exponential
+
+      console.log(`Rate limited. Retrying in ${retryDelay}ms...`);
+      await wait(retryDelay);
+      return this.generateChat(message, retryCount + 1);
+    }
+
+    // If we've exceeded retries or it's a different error, provide a user-friendly response
+    if (error.status === 429) {
+      return "I'm currently experiencing high demand. Please wait a few moments and try again. In the meantime, you can still use other features like content generation or image search.";
+    }
+
+    // For other errors, provide a more specific error message
+    return "I encountered an issue processing your message. Please try rephrasing your question or using simpler language.";
+  }
+};

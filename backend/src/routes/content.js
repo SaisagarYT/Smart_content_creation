@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const contentController = require("../controllers/content");
+const chatController = require("../controllers/chat");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" });
 
@@ -16,6 +17,9 @@ router.post("/generate-image", contentController.generateImage);
 
 // Get images from Pexels (must be before :id route)
 router.get("/pexels-images", contentController.getPexelsImages);
+
+// Handle chat messages
+router.post("/chat", chatController.handleChatMessage);
 
 // Get all contents
 router.get("/", contentController.getAllContents);
