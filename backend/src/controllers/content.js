@@ -72,13 +72,15 @@ exports.generateContent = async (req, res) => {
         .json({ message: "Topic and type or file are required" });
     }
 
-    // Generate content using AI
+    // Generate content using AI or save direct content
     let generatedContent;
     if (fileContent) {
       generatedContent = await aiClient.generateContentFromFile(
         fileContent,
         type
       );
+    } else if (req.body.content) {
+      generatedContent = req.body.content;
     } else {
       generatedContent = await aiClient.generateContent(topic, type);
     }
@@ -88,6 +90,7 @@ exports.generateContent = async (req, res) => {
       topic,
       type,
       content: generatedContent,
+      imageUrl: req.body.imageUrl, // Add image URL if provided
     });
 
     const savedContent = await newContent.save();
