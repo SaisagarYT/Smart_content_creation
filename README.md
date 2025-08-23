@@ -60,10 +60,10 @@ This project integrates **Node.js + Express + MongoDB (Backend)** and **React + 
 ## 📊 System Diagrams  
 
 ### 🔹 Data Flow Diagram  
-<img width="1126" height="1011" alt="Data Flow Diagram" src="https://github.com/user-attachments/assets/edcb08b1-027e-47c8-86aa-dba79d733c5e" />
+<img width="1126" height="1011" alt="Data Flow Diagram" src="https://github.com/user-attachments/assets/38a37cca-42cf-4218-ba97-e3a6be09524b" />
 
 ### 🔹 Sequence Diagram  
- <img width="1221" height="1081" alt="Sequence Diagram" src="https://github.com/user-attachments/assets/7f644e14-7427-4330-89a0-4e1aca377c53" />
+<img width="1204" height="1286" alt="Sequence Diagram" src="https://github.com/user-attachments/assets/c4dbcd45-e2b8-4d02-a7ea-c5420ac3f70d" />
 
 
 ---
